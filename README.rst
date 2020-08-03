@@ -2,7 +2,7 @@
 falcon-provider-rate-limit
 ==========================
 
-|coverage| |code-style| |pre-commit|
+|build| |coverage| |code-style| |pre-commit|
 
 A falcon middleware rate limit provider using Memcached or Redis.
 
@@ -197,7 +197,10 @@ For Memcache the default host is localhost and the default port is 11211. These 
 
     > pytest --cov=falcon_provider_rate_limit --cov-report=term-missing tests/
 
-.. |coverage| image:: https://codecov.io/gh/bcsummers/falcon-provider-rate-limit/branch/master/graph/badge.svg?token=prpmecioDm
+.. |build| image:: https://github.com/bcsummers/falcon-provider-rate-limit/workflows/build/badge.svg
+    :target: https://github.com/bcsummers/falcon-provider-rate-limit/actions
+
+.. |coverage| image:: https://codecov.io/gh/bcsummers/falcon-provider-rate-limit/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/bcsummers/falcon-provider-rate-limit
 
 .. |code-style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
