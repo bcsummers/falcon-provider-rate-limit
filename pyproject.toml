@@ -49,7 +49,7 @@ maintainers = ["Bracey Summers <bcsummers@gmail.com>"]
 name = "falcon-provider-rate-limit"
 readme = "README.rst"
 repository = "https://github.com/bcsummers/falcon-provider-rate-limit"
-packages = [{include = "falcon_provider_rate-limit"}]
+packages = [{include = "falcon_provider_rate_limit"}]
 version = "0.0.1"
 
 [tool.poetry.dependencies]
