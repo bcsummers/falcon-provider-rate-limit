@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Falcon app used for testing."""
 # standard library
 import os
@@ -35,13 +34,11 @@ class RedisResource:
         'unauthenticated_limit': 0,
     }
 
-    def on_get(
-        self, req: falcon.Request, resp: falcon.Response,
-    ):  # pylint: disable=no-self-use
+    def on_get(self, req: falcon.Request, resp: falcon.Response):
         """Support GET method."""
         key = req.get_param('key')
-        resp.body = 'test'
-        resp.body = f'{key}-worked'
+        resp.text = 'test'
+        resp.text = f'{key}-worked'
         resp.status_code = falcon.HTTP_OK
 
 
@@ -53,7 +50,7 @@ redis_provider_1 = RedisRateLimitProvider(
     auth_key='user_id',
     client_key='client_key',
 )
-app_redis_1 = falcon.API(middleware=[RateLimitMiddleware(redis_provider_1)])
+app_redis_1 = falcon.App(middleware=[RateLimitMiddleware(redis_provider_1)])
 app_redis_1.add_route('/middleware', RedisResource())
 
 
@@ -65,7 +62,7 @@ redis_provider_2 = RedisRateLimitProvider(
     auth_key='is_authenticated',
     client_key=None,
 )
-app_redis_2 = falcon.API(middleware=[RateLimitMiddleware(redis_provider_2)])
+app_redis_2 = falcon.App(middleware=[RateLimitMiddleware(redis_provider_2)])
 app_redis_2.add_route('/middleware', RedisResource())
 
 
@@ -77,5 +74,5 @@ redis_provider_3 = RedisRateLimitProvider(
     auth_key=None,
     client_key='client_key',
 )
-app_redis_3 = falcon.API(middleware=[RateLimitMiddleware(redis_provider_3)])
+app_redis_3 = falcon.App(middleware=[RateLimitMiddleware(redis_provider_3)])
 app_redis_3.add_route('/middleware', RedisResource())

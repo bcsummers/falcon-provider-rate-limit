@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 """Rate Limit utility."""
 # standard library
 import time
-from typing import Optional, Union
 
 # third-party
 import falcon
@@ -21,9 +19,9 @@ class RateLimitProvider:
 
     def __init__(
         self,
-        rate_limit_control: Optional[dict] = None,
-        auth_key: Optional[str] = None,
-        client_key: Optional[str] = None,
+        rate_limit_control: dict | None = None,
+        auth_key: str | None = None,
+        client_key: str | None = None,
     ):
         """Initialize class properties
 
@@ -73,7 +71,7 @@ class RateLimitProvider:
         Authenticated test is simply whether the req.context object has the auth_key attribute and
         that property is not None, False or an empty string. Typically this would be a check for
         username or user_id which would only exist for an authenticated user. If a custom
-        authentication module is use a property of "is_authenticated" with a boolen value could
+        authentication module is use a property of "is_authenticated" with a boolean value could
         be used.
 
         Args:
@@ -227,7 +225,7 @@ class RateLimitProvider:
         """Return rate limit control limit_window value."""
         return int(self._rate_limit_control.get('limit_window')) or 15
 
-    def rate_limit_control(self, rate_limit_control: Optional[dict] = None) -> dict:
+    def rate_limit_control(self, rate_limit_control: dict | None = None) -> dict:
         """Return rate limit control settings.
 
         Args:
@@ -302,14 +300,14 @@ class MemcacheRateLimitProvider(RateLimitProvider):
 
     def __init__(
         self,
-        rate_limit_control: Optional[dict] = None,
-        auth_key: Optional[str] = None,
-        client_key: Optional[str] = None,
-        server: Optional[Union[str, tuple]] = None,
+        rate_limit_control: dict | None = None,
+        auth_key: str | None = None,
+        client_key: str | None = None,
+        server: str | tuple | None = None,
         **kwargs,
     ):
         """Initialize class properties."""
-        super(MemcacheRateLimitProvider, self).__init__(rate_limit_control, auth_key, client_key)
+        super().__init__(rate_limit_control, auth_key, client_key)
 
         try:
             # third-party
@@ -426,17 +424,17 @@ class RedisRateLimitProvider(RateLimitProvider):
 
     def __init__(
         self,
-        rate_limit_control: Optional[dict] = None,
-        auth_key: Optional[str] = None,
-        client_key: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-        db: Optional[int] = None,
-        blocking_pool: Optional[bool] = False,
+        rate_limit_control: dict | None = None,
+        auth_key: str | None = None,
+        client_key: str | None = None,
+        host: str | None = None,
+        port: int | None = None,
+        db: int | None = None,
+        blocking_pool: bool | None = False,
         **kwargs,
     ):
         """Initialize class properties."""
-        super(RedisRateLimitProvider, self).__init__(rate_limit_control, auth_key, client_key)
+        super().__init__(rate_limit_control, auth_key, client_key)
         try:
             # third-party
             from falcon_provider_redis.utils import (  # pylint: disable=import-outside-toplevel

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Falcon rate limit provider middleware module."""
 # third-party
 import falcon
@@ -26,7 +25,11 @@ class RateLimitMiddleware:
             req.context.client_key = self.client_key  # pylint: disable=no-member
 
     def process_resource(  # pylint: disable=unused-argument
-        self, req: falcon.Request, resp: falcon.Response, resource: object, params: dict,
+        self,
+        req: falcon.Request,
+        resp: falcon.Response,
+        resource: object,
+        params: dict,
     ) -> None:
         """Process the request after routing and provide rate limit service."""
         # for pytest testing

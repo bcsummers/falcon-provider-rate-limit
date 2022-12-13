@@ -111,7 +111,7 @@ Memcache
         def on_get(self, req, resp):
             """Support GET method."""
             key = req.get_param('key')
-            resp.body = f'{key}-worked'
+            resp.text = f'{key}-worked'
             resp.status_code = falcon.HTTP_OK
 
     rate_limit_provider = MemcacheRateLimitProvider(
@@ -120,7 +120,7 @@ Memcache
         client_key=None,
     )
 
-    app = falcon.API(middleware=[RateLimitMiddleware(rate_limit_provider)])
+    app = falcon.App(middleware=[RateLimitMiddleware(rate_limit_provider)])
     app.add_route('/middleware', MemcacheResource())
 
 -----
@@ -157,7 +157,7 @@ Redis
         def on_get(self, req, resp):
             """Support GET method."""
             key = req.get_param('key')
-            resp.body = f'{key}-worked'
+            resp.text = f'{key}-worked'
             resp.status_code = falcon.HTTP_OK
 
     rate_limit_provider = RedisRateLimitProvider(
@@ -167,7 +167,7 @@ Redis
         client_key=None,
     )
 
-    app = falcon.API(middleware=[RateLimitMiddleware(rate_limit_provider)])
+    app = falcon.App(middleware=[RateLimitMiddleware(rate_limit_provider)])
     app.add_route('/middleware', RedisResource())
 
 -----------
@@ -181,7 +181,7 @@ After cloning the repository, all development requirements can be installed via 
 
 .. code:: bash
 
-    > pip install falcon-provider-rate-limit[dev]
+    > poetry install --with dev --all-extras
     > pre-commit install
 
 Testing
@@ -195,12 +195,13 @@ For Memcache the default host is localhost and the default port is 11211. These 
 
 .. code:: bash
 
+    > poetry install --with dev,test --all-extras
     > pytest --cov=falcon_provider_rate_limit --cov-report=term-missing tests/
 
 .. |build| image:: https://github.com/bcsummers/falcon-provider-rate-limit/workflows/build/badge.svg
     :target: https://github.com/bcsummers/falcon-provider-rate-limit/actions
 
-.. |coverage| image:: https://codecov.io/gh/bcsummers/falcon-provider-rate-limit/branch/master/graph/badge.svg
+.. |coverage| image:: https://codecov.io/gh/bcsummers/falcon-provider-rate-limit/branch/master/graph/badge.svg?token=2j0dOwnJQp
     :target: https://codecov.io/gh/bcsummers/falcon-provider-rate-limit
 
 .. |code-style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
