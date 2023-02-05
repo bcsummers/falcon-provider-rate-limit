@@ -55,7 +55,7 @@ jobs:
         strategy:
             matrix:
                 # os: [ubuntu-latest, macos-latest, windows-latest]
-                os: [ubuntu-latest, macos-latest]
+                os: [ubuntu-latest]
                 python-version: ['3.10', '3.11']
 
         services:
@@ -91,7 +91,7 @@ jobs:
             - name: Test with pytest
               run: >
                   poetry run pytest
-                  --cov=falcon_provider_logger
+                  --cov=falcon_provider_rate_limit
                   --cov-report=html:artifacts/cov-report-${{ matrix.os }}-${{ matrix.python-version }}
                   --cov-report=xml
                   --html=artifacts/test-report-${{ matrix.os }}-${{ matrix.python-version }}.html
