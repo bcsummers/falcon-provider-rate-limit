@@ -2,6 +2,9 @@
 # third-party
 import falcon
 
+# first-party
+from falcon_provider_rate_limit.utils import RateLimitProviderABC
+
 
 class RateLimitMiddleware:
     """Rate limit middleware module.
@@ -10,11 +13,11 @@ class RateLimitMiddleware:
         provider (RateLimitProvider): An instance of rate limit provider (memcache or Redis).
     """
 
-    def __init__(self, provider: object):
+    def __init__(self, provider: RateLimitProviderABC):
         """Initialize class properties."""
         self.provider = provider
 
-    def _testing(self, req) -> None:
+    def _testing(self, req: falcon.Request):
         """Update req context with values for testing."""
         if hasattr(self, 'user_id'):
             # inject a test user_id for pytest monkeypatch
@@ -28,8 +31,8 @@ class RateLimitMiddleware:
         self,
         req: falcon.Request,
         resp: falcon.Response,
-        resource: object,
-        params: dict,
+        resource,
+        params,
     ) -> None:
         """Process the request after routing and provide rate limit service."""
         # for pytest testing
@@ -81,7 +84,7 @@ class RateLimitMiddleware:
                 resp.complete = True  # signal short-circuit for response processing
 
     def process_response(  # pylint: disable=unused-argument
-        self, req: falcon.Request, resp: falcon.Response, resource: object, req_succeeded: bool
+        self, _req: falcon.Request, resp: falcon.Response, _resource, _req_succeeded
     ) -> None:
         """Handle rate limit for provided resources."""
         if not self.provider.enabled:

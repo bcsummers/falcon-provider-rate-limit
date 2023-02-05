@@ -1,12 +1,13 @@
 """Rate Limit utility."""
 # standard library
 import time
+from abc import ABC, abstractmethod
 
 # third-party
 import falcon
 
 
-class RateLimitProvider:
+class RateLimitProviderABC(ABC):
     """Base Rate Limit Provider Class.
 
     Args:
@@ -92,27 +93,28 @@ class RateLimitProvider:
         """Return rate limit control authenticated_limit value."""
         return self._rate_limit_control.get('authenticated_limit') or 0
 
-    def client_count(self, client_key):
+    @abstractmethod
+    def client_count(self, client_key: str):
         """Return the current client count."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def client_count_incr(self, client_key):
+    @abstractmethod
+    def client_count_incr(self, client_key: str):
         """Increment client count."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def client_count_set(self, client_key):
+    @abstractmethod
+    def client_count_set(self, client_key: str):
         """Set client count and expiration."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def client_key(
-        self, req: falcon.Request, resource: object  # pylint: disable=unused-argument
-    ) -> str:
+    def client_key(self, req: falcon.Request, resource) -> str:  # pylint: disable=unused-argument
         """Return the client key for this request.
 
         Args:
@@ -138,7 +140,8 @@ class RateLimitProvider:
 
         return client_key
 
-    def client_key_expires(self, client_key):
+    @abstractmethod
+    def client_key_expires(self, client_key: str):
         """Return key expiration in seconds."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
@@ -157,13 +160,15 @@ class RateLimitProvider:
             enabled = False
         return enabled
 
-    def dos_count(self, client_key):
+    @abstractmethod
+    def dos_count(self, client_key: str):
         """Return dos key from kv store."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def dos_count_incr(self, client_key):
+    @abstractmethod
+    def dos_count_incr(self, client_key: str):
         """Return dos key from kv store."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
@@ -174,7 +179,7 @@ class RateLimitProvider:
         """Return rate limit control dos_limit value."""
         return self._rate_limit_control.get('dos_limit') or 0
 
-    def dos_limit_reached(self, client_key) -> dict:
+    def dos_limit_reached(self, client_key: str) -> dict:
         """Return True if DOS rate limit reached, else False.
 
         Args:
@@ -274,7 +279,7 @@ class RateLimitProvider:
         return self._rate_limit_control.get('unauthenticated_limit') or 0
 
 
-class MemcacheRateLimitProvider(RateLimitProvider):
+class MemcacheRateLimitProvider(RateLimitProviderABC):
     """Memcache Provider Class.
 
     Args:
@@ -349,7 +354,7 @@ class MemcacheRateLimitProvider(RateLimitProvider):
         Args:
             client_key (str): The key identifying the current client.
         """
-        self.memcache_client.set(key=client_key, value=1, expire=(self.limit_window * 60))
+        self.memcache_client.set(key=client_key, value=1, expire=self.limit_window * 60)
 
         # memcached does allow retrieval of expiration time. the value is stored in a separate key.
         expiration_time_key = f'{client_key}-expires'
@@ -402,7 +407,7 @@ class MemcacheRateLimitProvider(RateLimitProvider):
         self.memcache_client.incr(dos_key, 1)
 
 
-class RedisRateLimitProvider(RateLimitProvider):
+class RedisRateLimitProvider(RateLimitProviderABC):
     """Redis Rate Limit Provider Class.
 
     Args:

@@ -177,7 +177,7 @@ Development
 Installation
 ------------
 
-After cloning the repository, all development requirements can be installed via pip. For linting and code consistency the pre-commit hooks should be installed.
+After cloning the repository, all development requirements can be installed via poetry. For linting and code consistency the pre-commit hooks should be installed.
 
 .. code:: bash
 
