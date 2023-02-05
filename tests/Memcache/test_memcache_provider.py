@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test middleware redis provider module."""
 # standard library
 import os
@@ -272,7 +271,11 @@ def test_dos_limit(
 
 @pytest.mark.parametrize('param,status_code,text', [('first', 200, 'first-worked')])
 def test_disabled(
-    client_memcache_1: object, param: str, status_code: int, text: str, monkeypatch: object,
+    client_memcache_1: object,
+    param: str,
+    status_code: int,
+    text: str,
+    monkeypatch: object,
 ):
     """Testing disabled rate limit
 

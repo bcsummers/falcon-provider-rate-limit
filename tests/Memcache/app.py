@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Falcon app used for testing."""
 # standard library
 import os
@@ -35,11 +34,10 @@ class MemcacheResource:
         'unauthenticated_limit': 0,
     }
 
-    def on_get(self, req, resp):  # pylint: disable=no-self-use
+    def on_get(self, req, resp):
         """Support GET method."""
         key = req.get_param('key')
-        resp.body = 'test'
-        resp.body = f'{key}-worked'  # pylint: disable=no-member
+        resp.text = f'{key}-worked'
         resp.status_code = falcon.HTTP_OK
 
 
@@ -50,7 +48,7 @@ memcache_provider_1 = MemcacheRateLimitProvider(
     auth_key='user_id',
     client_key='client_key',
 )
-app_memcache_1 = falcon.API(middleware=[RateLimitMiddleware(memcache_provider_1)])
+app_memcache_1 = falcon.App(middleware=[RateLimitMiddleware(memcache_provider_1)])
 app_memcache_1.add_route('/middleware', MemcacheResource())
 
 # Provider using no client_key
@@ -60,7 +58,7 @@ memcache_provider_2 = MemcacheRateLimitProvider(
     auth_key='is_authenticated',
     client_key=None,
 )
-app_memcache_2 = falcon.API(middleware=[RateLimitMiddleware(memcache_provider_2)])
+app_memcache_2 = falcon.App(middleware=[RateLimitMiddleware(memcache_provider_2)])
 app_memcache_2.add_route('/middleware', MemcacheResource())
 
 # Provider with no auth_key
@@ -70,5 +68,5 @@ memcache_provider_3 = MemcacheRateLimitProvider(
     auth_key=None,
     client_key='client_key',
 )
-app_memcache_3 = falcon.API(middleware=[RateLimitMiddleware(memcache_provider_3)])
+app_memcache_3 = falcon.App(middleware=[RateLimitMiddleware(memcache_provider_3)])
 app_memcache_3.add_route('/middleware', MemcacheResource())

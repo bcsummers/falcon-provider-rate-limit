@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 """Rate Limit utility."""
 # standard library
 import time
-from typing import Optional, Union
+from abc import ABC, abstractmethod
 
 # third-party
 import falcon
 
 
-class RateLimitProvider:
+class RateLimitProviderABC(ABC):
     """Base Rate Limit Provider Class.
 
     Args:
@@ -21,9 +20,9 @@ class RateLimitProvider:
 
     def __init__(
         self,
-        rate_limit_control: Optional[dict] = None,
-        auth_key: Optional[str] = None,
-        client_key: Optional[str] = None,
+        rate_limit_control: dict | None = None,
+        auth_key: str | None = None,
+        client_key: str | None = None,
     ):
         """Initialize class properties
 
@@ -73,7 +72,7 @@ class RateLimitProvider:
         Authenticated test is simply whether the req.context object has the auth_key attribute and
         that property is not None, False or an empty string. Typically this would be a check for
         username or user_id which would only exist for an authenticated user. If a custom
-        authentication module is use a property of "is_authenticated" with a boolen value could
+        authentication module is use a property of "is_authenticated" with a boolean value could
         be used.
 
         Args:
@@ -94,27 +93,28 @@ class RateLimitProvider:
         """Return rate limit control authenticated_limit value."""
         return self._rate_limit_control.get('authenticated_limit') or 0
 
-    def client_count(self, client_key):
+    @abstractmethod
+    def client_count(self, client_key: str):
         """Return the current client count."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def client_count_incr(self, client_key):
+    @abstractmethod
+    def client_count_incr(self, client_key: str):
         """Increment client count."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def client_count_set(self, client_key):
+    @abstractmethod
+    def client_count_set(self, client_key: str):
         """Set client count and expiration."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def client_key(
-        self, req: falcon.Request, resource: object  # pylint: disable=unused-argument
-    ) -> str:
+    def client_key(self, req: falcon.Request, resource) -> str:  # pylint: disable=unused-argument
         """Return the client key for this request.
 
         Args:
@@ -140,7 +140,8 @@ class RateLimitProvider:
 
         return client_key
 
-    def client_key_expires(self, client_key):
+    @abstractmethod
+    def client_key_expires(self, client_key: str):
         """Return key expiration in seconds."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
@@ -159,13 +160,15 @@ class RateLimitProvider:
             enabled = False
         return enabled
 
-    def dos_count(self, client_key):
+    @abstractmethod
+    def dos_count(self, client_key: str):
         """Return dos key from kv store."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
         )
 
-    def dos_count_incr(self, client_key):
+    @abstractmethod
+    def dos_count_incr(self, client_key: str):
         """Return dos key from kv store."""
         raise NotImplementedError(  # pragma: no cover
             'This method must be implemented in child class.'
@@ -176,7 +179,7 @@ class RateLimitProvider:
         """Return rate limit control dos_limit value."""
         return self._rate_limit_control.get('dos_limit') or 0
 
-    def dos_limit_reached(self, client_key) -> dict:
+    def dos_limit_reached(self, client_key: str) -> dict:
         """Return True if DOS rate limit reached, else False.
 
         Args:
@@ -227,7 +230,7 @@ class RateLimitProvider:
         """Return rate limit control limit_window value."""
         return int(self._rate_limit_control.get('limit_window')) or 15
 
-    def rate_limit_control(self, rate_limit_control: Optional[dict] = None) -> dict:
+    def rate_limit_control(self, rate_limit_control: dict | None = None) -> dict:
         """Return rate limit control settings.
 
         Args:
@@ -276,7 +279,7 @@ class RateLimitProvider:
         return self._rate_limit_control.get('unauthenticated_limit') or 0
 
 
-class MemcacheRateLimitProvider(RateLimitProvider):
+class MemcacheRateLimitProvider(RateLimitProviderABC):
     """Memcache Provider Class.
 
     Args:
@@ -302,14 +305,14 @@ class MemcacheRateLimitProvider(RateLimitProvider):
 
     def __init__(
         self,
-        rate_limit_control: Optional[dict] = None,
-        auth_key: Optional[str] = None,
-        client_key: Optional[str] = None,
-        server: Optional[Union[str, tuple]] = None,
+        rate_limit_control: dict | None = None,
+        auth_key: str | None = None,
+        client_key: str | None = None,
+        server: str | tuple | None = None,
         **kwargs,
     ):
         """Initialize class properties."""
-        super(MemcacheRateLimitProvider, self).__init__(rate_limit_control, auth_key, client_key)
+        super().__init__(rate_limit_control, auth_key, client_key)
 
         try:
             # third-party
@@ -351,7 +354,7 @@ class MemcacheRateLimitProvider(RateLimitProvider):
         Args:
             client_key (str): The key identifying the current client.
         """
-        self.memcache_client.set(key=client_key, value=1, expire=(self.limit_window * 60))
+        self.memcache_client.set(key=client_key, value=1, expire=self.limit_window * 60)
 
         # memcached does allow retrieval of expiration time. the value is stored in a separate key.
         expiration_time_key = f'{client_key}-expires'
@@ -404,7 +407,7 @@ class MemcacheRateLimitProvider(RateLimitProvider):
         self.memcache_client.incr(dos_key, 1)
 
 
-class RedisRateLimitProvider(RateLimitProvider):
+class RedisRateLimitProvider(RateLimitProviderABC):
     """Redis Rate Limit Provider Class.
 
     Args:
@@ -426,17 +429,17 @@ class RedisRateLimitProvider(RateLimitProvider):
 
     def __init__(
         self,
-        rate_limit_control: Optional[dict] = None,
-        auth_key: Optional[str] = None,
-        client_key: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-        db: Optional[int] = None,
-        blocking_pool: Optional[bool] = False,
+        rate_limit_control: dict | None = None,
+        auth_key: str | None = None,
+        client_key: str | None = None,
+        host: str | None = None,
+        port: int | None = None,
+        db: int | None = None,
+        blocking_pool: bool | None = False,
         **kwargs,
     ):
         """Initialize class properties."""
-        super(RedisRateLimitProvider, self).__init__(rate_limit_control, auth_key, client_key)
+        super().__init__(rate_limit_control, auth_key, client_key)
         try:
             # third-party
             from falcon_provider_redis.utils import (  # pylint: disable=import-outside-toplevel
